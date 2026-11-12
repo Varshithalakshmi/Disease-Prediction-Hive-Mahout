@@ -1,0 +1,4 @@
+Model,Accuracy,Precision,Recall,F1 Score
+Mahout Logistic Regression,75.5,29.96,56.68,39.2
+Random Forest,72.51,30.77,77.82,44.1
+Federated Logistic Regression,66.32,26.97,82.97,40.7

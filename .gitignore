@@ -1,10 +1,17 @@
-.venv/
+# Python temporary files
 __pycache__/
 *.py[cod]
+
+# Local Hive installation and temporary database
+apache-hive-4.2.1-bin/
+apache-hive-4.2.1-bin.tar.gz
+metastore_db/
+derby.log
+
+# Virtual environments
+.venv/
+venv/
+
+# OS files
 .DS_Store
-data/raw/*
-!data/raw/.gitkeep
-data/processed/*
-!data/processed/.gitkeep
-results/*.pkl
-results/*.joblib
+mahout/target/

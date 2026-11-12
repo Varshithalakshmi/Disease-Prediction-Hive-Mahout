@@ -1,0 +1,40 @@
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/workspaces/Disease-Prediction-Hive-Mahout/apache-hive-4.2.1-bin/lib/log4j-slf4j-impl-2.24.3.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/home/codespace/hadoop-3.4.1/share/hadoop/common/lib/slf4j-reload4j-1.7.36.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/workspaces/Disease-Prediction-Hive-Mahout/apache-hive-4.2.1-bin/lib/log4j-slf4j-impl-2.24.3.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/home/codespace/hadoop-3.4.1/share/hadoop/common/lib/slf4j-reload4j-1.7.36.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+Exception in thread "main" java.lang.IllegalStateException: Unable to create a terminal
+	at org.jline.terminal.TerminalBuilder.doBuild(TerminalBuilder.java:394)
+	at org.jline.terminal.TerminalBuilder.build(TerminalBuilder.java:362)
+	at org.apache.hive.beeline.BeeLine.buildTerminal(BeeLine.java:1554)
+	at org.apache.hive.beeline.BeeLine.initializeLineReader(BeeLine.java:1470)
+	at org.apache.hive.beeline.BeeLine.begin(BeeLine.java:1125)
+	at org.apache.hive.beeline.BeeLine.begin(BeeLine.java:1101)
+	at org.apache.hive.beeline.BeeLine.mainWithInputRedirection(BeeLine.java:567)
+	at org.apache.hive.beeline.BeeLine.mainWithInputRedirection(BeeLine.java:561)
+	at org.apache.hive.beeline.BeeLine.main(BeeLine.java:544)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.apache.hadoop.util.RunJar.run(RunJar.java:330)
+	at org.apache.hadoop.util.RunJar.main(RunJar.java:245)
+	Suppressed: java.lang.UnsupportedClassVersionError: Preview features are not enabled for org/jline/terminal/impl/ffm/FfmTerminalProvider (class file version 65.65535). Try running with '--enable-preview'
+		at java.base/java.lang.ClassLoader.defineClass1(Native Method)
+		at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1027)
+		at java.base/java.security.SecureClassLoader.defineClass(SecureClassLoader.java:150)
+		at java.base/jdk.internal.loader.BuiltinClassLoader.defineClass(BuiltinClassLoader.java:862)
+		at java.base/jdk.internal.loader.BuiltinClassLoader.findClassOnClassPathOrNull(BuiltinClassLoader.java:760)
+		at java.base/jdk.internal.loader.BuiltinClassLoader.loadClassOrNull(BuiltinClassLoader.java:681)
+		at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:639)
+		at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
+		at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:580)
+		at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+		at org.jline.terminal.spi.TerminalProvider.load(TerminalProvider.java:68)
+		at org.jline.terminal.TerminalBuilder.checkProvider(TerminalBuilder.java:665)
+		at org.jline.terminal.TerminalBuilder.getProviders(TerminalBuilder.java:630)
+		at org.jline.terminal.TerminalBuilder.doBuild(TerminalBuilder.java:395)
+		... 12 more

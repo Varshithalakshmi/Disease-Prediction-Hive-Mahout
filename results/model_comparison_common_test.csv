@@ -1,0 +1,4 @@
+Model,Accuracy,Precision,Recall,F1 Score
+Random Forest,0.7251,0.3077,0.7782,0.441
+Mahout Logistic Regression,0.7724,0.3143,0.5364,0.3964
+Federated Learning,0.6632,0.2697,0.8297,0.407
