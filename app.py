@@ -1,4 +1,3 @@
-
 from pathlib import Path
 
 import streamlit as st
@@ -284,97 +283,434 @@ if page == "Home":
 
 
 # ==========================================
-# DIABETES PREDICTION
+# DIABETES SCREENING & PREDICTION
 # ==========================================
 
 elif page == "Diabetes Prediction":
 
-    st.title("🔍 Diabetes Prediction")
+    st.title("🩺 Diabetes Screening & Prediction")
 
-    st.write(
-        "Enter numerical values for the health indicators below."
+    st.write("""
+    Complete the health questionnaire and then enter health indicators
+    for a separate Random Forest prediction.
+    """)
+
+    # --------------------------------------
+    # STEP 1: HEALTH QUESTIONNAIRE
+    # --------------------------------------
+
+    st.header("Step 1: Health Questionnaire")
+
+    st.info(
+        "Answer these questions about your health. The questionnaire "
+        "summarises reported symptoms; it does not diagnose diabetes "
+        "and its answers are not fed into the machine-learning model."
     )
 
-    st.warning(
-        "The current input range is 1 to 100 as requested. "
-        "However, the original dataset uses different ranges and "
-        "encodings for several features. Predictions may therefore "
-        "be unreliable for arbitrary inputs."
-    )
+    with st.form("health_questionnaire"):
 
-    with st.form("prediction_form"):
+        st.subheader("A. Diabetes Symptoms")
 
-        values = {}
+        thirst = st.radio(
+            "1. Do you often feel unusually thirsty?",
+            ["Yes", "No"],
+            horizontal=True
+        )
 
-        left, right = st.columns(2)
+        urination = st.radio(
+            "2. Do you urinate frequently, especially at night?",
+            ["Yes", "No"],
+            horizontal=True
+        )
 
-        for index, feature in enumerate(model.feature_names_in_):
+        weight_loss = st.radio(
+            "3. Have you experienced unexplained weight loss?",
+            ["Yes", "No"],
+            horizontal=True
+        )
 
-            container = left if index % 2 == 0 else right
+        fatigue = st.radio(
+            "4. Do you often feel tired or weak?",
+            ["Yes", "No"],
+            horizontal=True
+        )
 
-            with container:
+        vision = st.radio(
+            "5. Have you experienced blurred vision?",
+            ["Yes", "No"],
+            horizontal=True
+        )
 
-                values[feature] = st.number_input(
-                    label=feature,
-                    min_value=1,
-                    max_value=100,
-                    value=1,
-                    step=1
-                )
+        st.subheader("B. Medical & Family History")
 
-        submitted = st.form_submit_button(
-            "Predict Diabetes",
+        family_history = st.radio(
+            "6. Does anyone in your immediate family have diabetes?",
+            ["Yes", "No"],
+            horizontal=True
+        )
+
+        blood_pressure = st.radio(
+            "7. Have you been diagnosed with high blood pressure?",
+            ["Yes", "No"],
+            horizontal=True
+        )
+
+        cholesterol = st.radio(
+            "8. Have you been diagnosed with high cholesterol?",
+            ["Yes", "No"],
+            horizontal=True
+        )
+
+        gestational = st.radio(
+            "9. Have you experienced diabetes during pregnancy?",
+            ["Yes", "No"],
+            horizontal=True
+        )
+
+        st.subheader("C. Lifestyle")
+
+        exercise = st.radio(
+            "10. Do you exercise regularly?",
+            ["Yes", "No"],
+            horizontal=True
+        )
+
+        diet = st.radio(
+            "11. Do you regularly eat a healthy balanced diet?",
+            ["Yes", "No"],
+            horizontal=True
+        )
+
+        smoking = st.radio(
+            "12. Do you smoke regularly?",
+            ["Yes", "No"],
+            horizontal=True
+        )
+
+        questionnaire_submitted = st.form_submit_button(
+            "Submit Health Questionnaire",
             type="primary",
             width="stretch"
         )
 
-    if submitted:
+    if questionnaire_submitted:
 
-        input_data = pd.DataFrame(
-            [[values[feature] for feature in model.feature_names_in_]],
-            columns=model.feature_names_in_
+        st.session_state["health_assessment"] = {
+            "Unusual thirst": thirst,
+            "Frequent urination": urination,
+            "Unexplained weight loss": weight_loss,
+            "Fatigue": fatigue,
+            "Blurred vision": vision,
+            "Family history": family_history,
+            "High blood pressure": blood_pressure,
+            "High cholesterol": cholesterol,
+            "Gestational diabetes history": gestational,
+            "Exercise": exercise,
+            "Healthy diet": diet,
+            "Smoking": smoking
+        }
+
+    if "health_assessment" in st.session_state:
+
+        answers = st.session_state["health_assessment"]
+
+        symptom_questions = [
+            "Unusual thirst",
+            "Frequent urination",
+            "Unexplained weight loss",
+            "Fatigue",
+            "Blurred vision"
+        ]
+
+        symptom_count = sum(
+            answers[question] == "Yes"
+            for question in symptom_questions
         )
 
-        try:
+        st.subheader("Questionnaire Summary")
+        st.write(f"Symptoms reported: {symptom_count} out of 5")
 
-            prediction = int(model.predict(input_data)[0])
-
-            probability = float(
-                model.predict_proba(input_data)[0][1]
+        if symptom_count >= 2:
+            st.warning(
+                "You reported multiple symptoms that can occur with "
+                "diabetes. Consider arranging a medical evaluation and "
+                "appropriate blood glucose testing."
+            )
+        else:
+            st.info(
+                "You reported few or no symptoms. This does not rule out "
+                "diabetes. Testing may still be needed based on your "
+                "health history and a healthcare professional's advice."
             )
 
-            st.markdown("---")
-            st.subheader("Prediction Result")
+        st.caption(
+            "This is a simple symptom summary, not a validated risk score "
+            "or a diagnosis of diabetes."
+        )
 
-            if prediction == 1:
+    st.markdown("---")
 
-                st.error(
-                    "The model predicts a positive diabetes indicator."
-                )
+    # --------------------------------------
+    # STEP 2: RANDOM FOREST PREDICTION
+    # --------------------------------------
 
-            else:
+    st.header("Step 2: Machine Learning Prediction")
 
-                st.success(
-                    "The model predicts a negative diabetes indicator."
-                )
+    st.write(
+        "Answer the Yes/No questions and enter Age, BMI and blood pressure. "
+        "The six demographic/diet fields are automatically filled using "
+        "the most common values in the test dataset."
+    )
 
-            st.metric(
-                "Estimated Positive-Class Probability",
-                f"{probability * 100:.2f}%"
+    try:
+        df = load_dataset()
+        model_features = list(model.feature_names_in_)
+
+        missing_features = [
+            f for f in model_features if f not in df.columns
+        ]
+
+        if missing_features:
+            st.error(
+                "The test dataset is missing model features: "
+                + ", ".join(missing_features)
             )
 
-            st.progress(probability)
+        else:
 
-            st.warning("""
-            This is an educational machine-learning estimate,
-            not a medical diagnosis. The requested 1–100 inputs
-            may not match the original dataset encoding.
-            """)
+            yes_no_features = {
+                "HighBP": "Have you been diagnosed with high blood pressure?",
+                "HighChol": "Have you been diagnosed with high cholesterol?",
+                "CholCheck": "Have you had your cholesterol checked in the last 5 years?",
+                "Smoker": "Have you smoked at least 100 cigarettes in your life?",
+                "Stroke": "Have you ever had a stroke?",
+                "HeartDiseaseorAttack": "Have you ever had coronary heart disease or a heart attack?",
+                "PhysActivity": "Have you done physical activity or exercise in the past 30 days?",
+                "HvyAlcoholConsump": "Do you consume alcohol heavily?",
+                "NoDocbcCost": "Was there a time in the past 12 months when you needed to see a doctor but could not because of cost?",
+                "DiffWalk": "Do you have serious difficulty walking or climbing stairs?",
+            }
 
-        except Exception as error:
+            hidden_features = [
+                "Sex",
+                "Fruits",
+                "Veggies",
+                "Income",
+                "Education",
+                "AnyHealthcare"
+            ]
 
-            st.error("Prediction failed.")
-            st.exception(error)
+            with st.form("prediction_form"):
+
+                st.subheader("Health Questions")
+
+                values = {}
+
+                left, right = st.columns(2)
+
+                for i, (feature, question) in enumerate(
+                    yes_no_features.items()
+                ):
+
+                    if feature in model_features:
+
+                        with (left if i % 2 == 0 else right):
+
+                            answer = st.radio(
+                                question,
+                                ["No", "Yes"],
+                                key=f"question_{feature}",
+                                horizontal=True
+                            )
+
+                            values[feature] = (
+                                1 if answer == "Yes" else 0
+                            )
+
+                st.subheader("Health Measurements")
+
+                col1, col2, col3 = st.columns(3)
+
+                age = col1.number_input(
+                    "Age (years)",
+                    min_value=1,
+                    max_value=100,
+                    value=30,
+                    step=1
+                )
+
+                bmi = col2.number_input(
+                    "BMI",
+                    min_value=1,
+                    max_value=100,
+                    value=25,
+                    step=1
+                )
+
+                bp = col3.number_input(
+                    "Systolic Blood Pressure (mmHg)",
+                    min_value=1,
+                    max_value=1000,
+                    value=120,
+                    step=1
+                )
+
+                if "Age" in model_features:
+
+                    age_edges = [
+                        24, 29, 34, 39, 44, 49,
+                        54, 59, 64, 69, 74, 79
+                    ]
+
+                    values["Age"] = min(
+                        13,
+                        1 + sum(age > edge for edge in age_edges)
+                    )
+
+                if "BMI" in model_features:
+                    values["BMI"] = bmi
+
+                if "HighBP" in model_features:
+                    values["HighBP"] = 1 if bp >= 130 else 0
+
+                if "GenHlth" in model_features:
+
+                    general_health = st.radio(
+                        "Do you consider your general health to be poor?",
+                        ["No", "Yes"],
+                        horizontal=True
+                    )
+
+                    values["GenHlth"] = (
+                        1 if general_health == "No" else 5
+                    )
+
+                if "PhysHlth" in model_features:
+
+                    physical_health = st.radio(
+                        "Have you had physical health problems in the past 30 days?",
+                        ["No", "Yes"],
+                        horizontal=True
+                    )
+
+                    values["PhysHlth"] = (
+                        0 if physical_health == "No" else 30
+                    )
+
+                if "MentHlth" in model_features:
+
+                    mental_health = st.radio(
+                        "Have you had mental health problems in the past 30 days?",
+                        ["No", "Yes"],
+                        horizontal=True
+                    )
+
+                    values["MentHlth"] = (
+                        0 if mental_health == "No" else 30
+                    )
+
+                submitted = st.form_submit_button(
+                    "Predict Using Random Forest",
+                    type="primary",
+                    width="stretch"
+                )
+
+            if submitted:
+
+                for feature in hidden_features:
+
+                    if feature in model_features:
+
+                        mode_values = (
+                            pd.to_numeric(
+                                df[feature],
+                                errors="coerce"
+                            )
+                            .dropna()
+                            .mode()
+                        )
+
+                        if mode_values.empty:
+                            raise ValueError(
+                                f"Cannot determine a default value for {feature}."
+                            )
+
+                        values[feature] = int(mode_values.iloc[0])
+
+                for feature in model_features:
+
+                    if feature not in values:
+
+                        mode_values = (
+                            pd.to_numeric(
+                                df[feature],
+                                errors="coerce"
+                            )
+                            .dropna()
+                            .mode()
+                        )
+
+                        if mode_values.empty:
+                            raise ValueError(
+                                f"Cannot determine a default value for {feature}."
+                            )
+
+                        values[feature] = int(mode_values.iloc[0])
+
+                input_data = pd.DataFrame(
+                    [[values[f] for f in model_features]],
+                    columns=model_features
+                )
+
+                prediction = int(model.predict(input_data)[0])
+
+                st.markdown("---")
+                st.subheader("Random Forest Prediction Result")
+
+                if prediction == 1:
+                    st.error(
+                        "The model predicts a positive diabetes indicator."
+                    )
+                else:
+                    st.success(
+                        "The model predicts a negative diabetes indicator."
+                    )
+
+                if hasattr(model, "predict_proba"):
+
+                    probabilities = model.predict_proba(input_data)[0]
+                    classes = list(model.classes_)
+
+                    if 1 in classes:
+
+                        probability = float(
+                            probabilities[classes.index(1)]
+                        )
+
+                        st.metric(
+                            "Estimated Positive-Class Probability",
+                            f"{probability * 100:.2f}%"
+                        )
+
+                        st.progress(probability)
+
+                st.warning(
+                    "Educational estimate only — not a medical diagnosis. "
+                    "The original BRFSS dataset uses age bands, diagnosed "
+                    "high blood pressure, and scaled health indicators. "
+                    "Converting your requested age/BP/Yes-No inputs to "
+                    "those fields is approximate, so this result may be "
+                    "unreliable. Please consult a healthcare professional "
+                    "for testing and interpretation."
+                )
+
+    except Exception as error:
+
+        st.error(
+            "Unable to load the dataset or perform the prediction."
+        )
+
+        st.exception(error)
 
 
 # ==========================================
@@ -712,8 +1048,6 @@ elif page == "Fairness Analysis":
     )
 
     if comparison is not None and not comparison.empty:
-
-        # Overall performance
 
         overall = comparison[
             comparison["Group_Type"] == "Overall"
