@@ -1,3 +1,4 @@
+
 from pathlib import Path
 
 import streamlit as st
@@ -143,8 +144,7 @@ page = st.sidebar.radio(
         "Dataset Analysis",
         "Model Comparison",
         "Explainable AI",
-        "Fairness Analysis",
-        "About Project"
+        "Fairness Analysis"
     ]
 )
 
@@ -982,7 +982,7 @@ elif page == "Explainable AI":
 
         st.info(
             "Individual SHAP explanation is not available. "
-            "Run python src/explain_model.py to generate it."
+            "Run python src/explain_model.py to generate SHAP results."
         )
 
     st.markdown("---")
@@ -1283,43 +1283,4 @@ elif page == "Fairness Analysis":
     st.caption(
         "Fairness metrics describe differences in model performance. "
         "They do not independently establish discrimination or causation."
-    )
-
-
-# ==========================================
-# ABOUT PROJECT
-# ==========================================
-
-elif page == "About Project":
-
-    st.title("ℹ️ About the Project")
-
-    st.subheader(
-        "Disease Prediction Using Hive and Apache Mahout"
-    )
-
-    st.write("""
-    This academic research project explores diabetes
-    indicator prediction using health-related data.
-
-    ### Technologies Used
-
-    - Apache Hive: Big-data analysis and storage.
-    - Apache Mahout: Logistic regression.
-    - Python and Scikit-learn: Random Forest.
-    - Explainable AI: Random Forest feature importance and SHAP.
-    - Fairness Analysis: Group-level evaluation.
-    - Federated Learning: Three simulated hospitals.
-
-    ### Research Limitations
-
-    The models are not clinically validated.
-
-    Federated learning is simulated and does not implement
-    production-grade privacy guarantees.
-    """)
-
-    st.success(
-        "This project demonstrates the integration of "
-        "big-data technologies and machine learning."
     )
